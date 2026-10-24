@@ -166,7 +166,7 @@
     </div>
     <div class="fila2">
       <div class="campo"><label for="p-costo">Costo por unidad *</label><input id="p-costo" type="number" min="0" step="any"></div>
-      <div class="campo"><label for="p-precio">Precio unitario de venta *</label><input id="p-precio" type="number" min="0" step="any"></div>
+      <div class="campo"><label for="p-precio">Precio unitario de venta (opcional)</label><input id="p-precio" type="number" min="0" step="any"></div>
     </div>
     <div class="error" id="err-producto"></div>
     <div class="botones">
@@ -242,7 +242,7 @@ function cargarDatos() {
     const crudo = localStorage.getItem(CLAVE_DATOS);
     if (crudo) return JSON.parse(crudo);
   } catch (e) { console.warn('No se pudieron leer los datos', e); }
-  return crearDatosEjemplo();       // primera vez: se cargan 5 productos de ejemplo
+  return dbVacia();                 // primera vez: el sistema empieza en blanco
 }
 
 function guardarDatos() {
@@ -306,7 +306,7 @@ function validarProducto(d, idActual) {
   if (!Number.isFinite(d.cantidad) || d.cantidad < 0) return 'La cantidad debe ser un número igual o mayor que 0.';
   if (!Number.isFinite(d.minimo) || d.minimo < 0) return 'El aviso de existencia baja debe ser un número igual o mayor que 0.';
   if (!Number.isFinite(d.costo) || d.costo < 0) return 'El costo debe ser un número igual o mayor que 0.';
-  if (!Number.isFinite(d.precio) || d.precio <= 0) return 'El precio de venta debe ser un número mayor que 0.';
+  if (!Number.isFinite(d.precio) || d.precio < 0) return 'El precio de venta debe ser un número igual o mayor que 0 (o déjalo vacío).';
   return '';
 }
 
@@ -372,27 +372,6 @@ function anularMovimiento(id) {
   db.movimientos = db.movimientos.filter(m => m.id !== id);
 }
 
-// ---------- Datos de ejemplo ----------
-function crearDatosEjemplo() {
-  db = dbVacia();
-  const ej = [
-    ['Arroz blanco 1 kg',        50, 0.80, 1.20, 10],
-    ['Aceite de cocina 1 L',     12, 2.50, 3.60, 10],
-    ['Azúcar 1 kg',              40, 0.70, 1.00, 10],
-    ['Jabón de baño',            25, 0.45, 0.90,  8],
-    ['Refresco 2 L',              9, 1.10, 1.75,  6],
-  ];
-  ej.forEach(([descripcion, cantidad, costo, precio, minimo]) => crearProducto({ descripcion, cantidad, costo, precio, minimo }));
-  const id = (i) => db.productos[i].id;
-  const f = hoy();
-  registrarMovimiento({ tipo: 'salida',  productoId: id(0), cantidad: 6, unitario: 1.20, fecha: f, credito: true, tercero: 'Tienda La Esquina', nota: '' });
-  registrarMovimiento({ tipo: 'salida',  productoId: id(1), cantidad: 4, unitario: 3.60, fecha: f, credito: false, nota: 'Venta al contado' });
-  registrarMovimiento({ tipo: 'entrada', productoId: id(2), cantidad: 10, unitario: 0.70, fecha: f, credito: true, tercero: 'Distribuidora Central', nota: '' });
-  registrarMovimiento({ tipo: 'salida',  productoId: id(4), cantidad: 6, unitario: 1.75, fecha: f, credito: false, nota: '' });
-  guardarDatos();
-  return db;
-}
-
 /* =====================================================================
    INTERFAZ
    ===================================================================== */
@@ -446,7 +425,7 @@ function pintarProductos() {
       <td>${esc(p.codigo)}</td>
       <td class="desc">${esc(p.descripcion)} ${estaBajo(p) ? '<span class="etiqueta bajo">Existencia baja</span>' : ''}</td>
       <td class="num">${numero(p.cantidad)}</td><td class="num">${dinero(p.costo)}</td><td class="num">${dinero(p.precio)}</td>
-      <td class="num">${dinero(margenUnitario(p))} (${numero(margenPorcentaje(p))}%)</td>
+      <td class="num">${p.precio > 0 ? `${dinero(margenUnitario(p))} (${numero(margenPorcentaje(p))}%)` : '—'}</td>
       <td class="num">${dinero(valorInventario(p))}</td><td class="num">${dinero(valorVenta(p))}</td>
       <td class="num">${dinero(pendientesDeProducto(p.id, 'cobrar'))}</td><td class="num">${dinero(pendientesDeProducto(p.id, 'pagar'))}</td>
       <td><button class="mini" data-editar="${p.id}">Editar</button><button class="mini peligro" data-eliminar="${p.id}">Eliminar</button></td>
@@ -465,7 +444,7 @@ function abrirProducto(id) {
   $('#p-cant').value = p ? p.cantidad : '';
   $('#p-min').value = p ? p.minimo : 5;
   $('#p-costo').value = p ? p.costo : '';
-  $('#p-precio').value = p ? p.precio : '';
+  $('#p-precio').value = p && p.precio > 0 ? p.precio : '';   // el precio es opcional: 0 se muestra vacío
   $('#err-producto').textContent = '';
   $('#dlg-producto').showModal();
   $('#p-desc').focus();
@@ -479,11 +458,11 @@ $('#form-producto').addEventListener('submit', e => {
     cantidad: $('#p-cant').valueAsNumber,
     minimo: $('#p-min').valueAsNumber,
     costo: $('#p-costo').valueAsNumber,
-    precio: $('#p-precio').valueAsNumber,
+    precio: $('#p-precio').value === '' ? 0 : $('#p-precio').valueAsNumber,   // vacío = sin precio (0)
   };
   const error = validarProducto(datos, productoEditando);
   if (error) { $('#err-producto').textContent = error; return; }
-  if (datos.precio < datos.costo && !confirm('El precio de venta es menor que el costo (vas a perder dinero). ¿Guardar de todos modos?')) return;
+  if (datos.precio > 0 && datos.precio < datos.costo && !confirm('El precio de venta es menor que el costo (vas a perder dinero). ¿Guardar de todos modos?')) return;
 
   if (productoEditando) {
     const p = productoPorId(productoEditando);
