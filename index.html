@@ -228,7 +228,8 @@
    ===================================================================== */
 
 // ---------- Configuración ----------
-const CLAVE_DATOS = 'inventario_datos_v1';
+const CLAVE_DATOS = 'inventario_datos_v2';
+const CLAVE_ANTIGUA = 'inventario_datos_v1';   // guardado de la versión con datos de ejemplo: se elimina al abrir
 const MONEDA = '$';                 // Cambia aquí el símbolo de moneda (por ejemplo 'Bs', 'S/', '€')
 
 // ---------- Base de datos (en memoria + localStorage) ----------
@@ -238,6 +239,7 @@ const MONEDA = '$';                 // Cambia aquí el símbolo de moneda (por e
 let db = dbVacia();   // se llena con los datos guardados al final del archivo (sección "Inicio")
 
 function cargarDatos() {
+  try { localStorage.removeItem(CLAVE_ANTIGUA); } catch (e) { /* sin acceso al guardado */ }
   try {
     const crudo = localStorage.getItem(CLAVE_DATOS);
     if (crudo) return JSON.parse(crudo);
