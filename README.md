@@ -8,6 +8,7 @@ Programa de gestión de inventario para pequeños negocios. Funciona en el naveg
 inventario/
 ├── index.html      ← EL PROGRAMA (ábrelo con doble clic)
 ├── lib/            ← librerías para exportar a Excel y PDF (no las borres)
+├── ejemplos/       ← archivo de ejemplo para importar (inventario de un colmado)
 └── README.md       ← esta guía
 ```
 
@@ -32,6 +33,18 @@ Los datos se guardan **permanentemente dentro del navegador** de ese computador.
 El programa arranca **en blanco**, sin productos ni movimientos. Empieza creando tu primer producto (ver abajo).
 
 Si antes lo abriste en ese navegador y quedaron datos de prueba, pulsa **🗑 Borrar todo** (arriba a la derecha) para dejarlo vacío.
+
+## Importar productos desde Excel o CSV
+
+En la pestaña **Productos**, pulsa **⬆ Importar productos** y elige un archivo `.xlsx` o `.csv`.
+
+- La primera fila debe tener los nombres de las columnas: **Descripción**, **Cantidad**, **Costo** (obligatorias), y **Precio de venta** y **Aviso de existencia baja** (opcionales). El programa reconoce también nombres parecidos como *Producto*, *Existencia* o *Costo unitario*.
+- Pulsa **Plantilla** para descargar un Excel vacío con las columnas correctas.
+- Antes de importar, el programa te muestra cuántos productos entrarán y cuáles se omiten (descripción repetida, cantidad o costo inválidos). Los productos nuevos reciben su código automáticamente.
+
+### Archivo de ejemplo: inventario de un colmado
+
+En `ejemplos/inventario_colmado.xlsx` hay un inventario de ejemplo con 68 productos típicos de un colmado (granos, enlatados, bebidas, higiene, etc.), con precios referenciales en pesos dominicanos. Impórtalo para probar el programa y bórralo con **🗑 Borrar todo** cuando quieras empezar con tus datos reales. En la versión publicada lo puedes descargar en `/ejemplos/inventario_colmado.xlsx`.
 
 ## Cómo crear tu primer producto
 
