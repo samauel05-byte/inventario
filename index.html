@@ -533,7 +533,19 @@ $('#archivo-importar').addEventListener('change', e => {
   if (!archivo) return;
   const lector = new FileReader();
   lector.onload = () => {
-    try { importarFilas(XLSX.read(lector.result, { type: 'array' }), archivo.name); }
+    try {
+      let libro;
+      if (/\.csv$/i.test(archivo.name)) {
+        // Un CSV se lee como texto: UTF-8 y, si no lo es (Excel antiguo), Windows-1252.
+        let texto;
+        try { texto = new TextDecoder('utf-8', { fatal: true }).decode(lector.result); }
+        catch (e) { texto = new TextDecoder('windows-1252').decode(lector.result); }
+        libro = XLSX.read(texto.replace(/^\uFEFF/, ''), { type: 'string' });
+      } else {
+        libro = XLSX.read(lector.result, { type: 'array' });
+      }
+      importarFilas(libro, archivo.name);
+    }
     catch (err) { console.error(err); alert('No se pudo leer el archivo. Usa un Excel (.xlsx) o un CSV.'); }
   };
   lector.readAsArrayBuffer(archivo);
@@ -550,27 +562,34 @@ function importarFilas(libro, nombreArchivo) {
   const faltan = ['descripcion', 'cantidad', 'costo'].filter(c => !col[c]);
   if (faltan.length) return alert('Faltan columnas obligatorias: ' + faltan.map(c => ({ descripcion: 'Descripción', cantidad: 'Cantidad', costo: 'Costo' })[c]).join(', ') + '.\nPuedes descargar la plantilla con el botón “Plantilla”.');
 
-  const nuevos = [], problemas = [], vistos = new Set();
+  const nuevos = [], actualizados = [], problemas = [], vistos = new Set();
   filas.forEach((fila, i) => {
     const descripcion = String(fila[col.descripcion] ?? '').trim();
     if (!descripcion && !String(fila[col.cantidad]).trim() && !String(fila[col.costo]).trim()) return;   // fila vacía
+    // Si el producto ya existe (misma descripción) se actualiza; si no, se crea.
+    const existente = db.productos.find(p => p.descripcion.trim().toLowerCase() === descripcion.toLowerCase());
     const precio = col.precio ? aNumero(fila[col.precio]) : NaN;
     const minimo = col.minimo ? aNumero(fila[col.minimo]) : NaN;
-    const datos = { descripcion, cantidad: aNumero(fila[col.cantidad]), costo: aNumero(fila[col.costo]),
-      precio: Number.isNaN(precio) ? 0 : precio, minimo: Number.isNaN(minimo) ? 5 : minimo };
-    let error = validarProducto(datos);
-    if (!error && vistos.has(descripcion.toLowerCase())) error = 'Ya existe un producto con esa descripción.';
+    // Una celda de precio o aviso vacía conserva el valor que ya tenía el producto.
+    const datos = { descripcion: existente ? existente.descripcion : descripcion, cantidad: aNumero(fila[col.cantidad]), costo: aNumero(fila[col.costo]),
+      precio: Number.isNaN(precio) ? (existente ? existente.precio : 0) : precio,
+      minimo: Number.isNaN(minimo) ? (existente ? existente.minimo : 5) : minimo };
+    let error = validarProducto(datos, existente ? existente.id : null);
+    if (!error && vistos.has(descripcion.toLowerCase())) error = 'La descripción aparece repetida en el archivo.';
     if (error) return problemas.push(`Fila ${i + 2}${descripcion ? ' (' + descripcion + ')' : ''}: ${error}`);
     vistos.add(descripcion.toLowerCase());
-    nuevos.push(datos);
+    (existente ? actualizados : nuevos).push(existente ? { existente, datos } : datos);
   });
 
-  let resumen = `Archivo: ${nombreArchivo}\nSe importarán ${nuevos.length} producto(s).`;
-  if (problemas.length) resumen += `\nSe omitirán ${problemas.length} fila(s) con problemas:\n- ` + problemas.slice(0, 8).join('\n- ') + (problemas.length > 8 ? `\n… y ${problemas.length - 8} más` : '');
-  if (!nuevos.length) return alert(resumen + '\n\nNo hay nada que importar.');
+  let resumen = `Archivo: ${nombreArchivo}\nProductos nuevos: ${nuevos.length}\nProductos que ya existían y se actualizarán: ${actualizados.length}`;
+  if (actualizados.length) resumen += '\n(Su cantidad, costo, precio y aviso se reemplazan por los del archivo.)';
+  if (problemas.length) resumen += `\n\nSe omitirán ${problemas.length} fila(s) con problemas:\n- ` + problemas.slice(0, 8).join('\n- ') + (problemas.length > 8 ? `\n… y ${problemas.length - 8} más` : '');
+  if (!nuevos.length && !actualizados.length) return alert(resumen + '\n\nNo hay nada que importar.');
   if (!confirm(resumen + '\n\n¿Continuar?')) return;
   nuevos.forEach(crearProducto);
-  guardarDatos(); pintarTodo(); toast(`${nuevos.length} producto(s) importados`);
+  actualizados.forEach(({ existente, datos }) => Object.assign(existente, datos));
+  guardarDatos(); pintarTodo();
+  toast(`${nuevos.length} nuevo(s), ${actualizados.length} actualizado(s)`);
 }
 
 // ---------- Movimientos ----------
