@@ -27,19 +27,11 @@ Los datos se guardan **permanentemente dentro del navegador** de ese computador.
 - ⚠️ Si borras los “datos del sitio/cookies” del navegador, se borra el inventario.
 - 👉 **Haz un respaldo con frecuencia**: botón **⬇ Guardar respaldo** (arriba a la derecha). Guarda el archivo `.json` en un lugar seguro (USB, Drive). Para recuperarlo usa **⬆ Restaurar respaldo**.
 
-## Productos de ejemplo
+## Primera vez
 
-La primera vez que abres el programa vienen **5 productos de ejemplo** (con algunas ventas, una compra y cuentas de ejemplo) para que pruebes todo:
+El programa arranca **en blanco**, sin productos ni movimientos. Empieza creando tu primer producto (ver abajo).
 
-| Código | Producto | Costo | Precio |
-|---|---|---|---|
-| P-0001 | Arroz blanco 1 kg | 0,80 | 1,20 |
-| P-0002 | Aceite de cocina 1 L | 2,50 | 3,60 |
-| P-0003 | Azúcar 1 kg | 0,70 | 1,00 |
-| P-0004 | Jabón de baño | 0,45 | 0,90 |
-| P-0005 | Refresco 2 L | 1,10 | 1,75 |
-
-Cuando termines de probar, pulsa **🗑 Borrar todo** (arriba a la derecha) para empezar con tu inventario real.
+Si antes lo abriste en ese navegador y quedaron datos de prueba, pulsa **🗑 Borrar todo** (arriba a la derecha) para dejarlo vacío.
 
 ## Cómo crear tu primer producto
 
