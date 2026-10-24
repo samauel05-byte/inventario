@@ -49,10 +49,10 @@ Cuando termines de probar, pulsa **🗑 Borrar todo** (arriba a la derecha) para
    - **Cantidad inicial**: cuántas unidades tienes hoy (ej. `30`).
    - **Avisar si hay menos de**: el programa te alertará cuando la existencia llegue a ese número.
    - **Costo por unidad**: lo que te cuesta a ti (ej. `0.90`).
-   - **Precio unitario de venta**: lo que cobras al cliente (ej. `1.40`).
+   - **Precio unitario de venta** (opcional): lo que cobras al cliente (ej. `1.40`). Si lo dejas vacío, el producto se guarda sin precio y podrás ponerlo después con *Editar*.
 3. Pulsa **Guardar**. El producto recibe automáticamente su código (`P-0006`, `P-0007`…).
 
-El programa **no te dejará** guardar si: hay campos vacíos, la cantidad es negativa, el precio no es válido (debe ser mayor que 0) o ya existe otro producto con la misma descripción.
+El programa **no te dejará** guardar si: hay campos vacíos, la cantidad es negativa, el precio, si lo escribes, no es válido (no puede ser negativo) o ya existe otro producto con la misma descripción.
 
 ## Cómo usar cada pestaña
 
