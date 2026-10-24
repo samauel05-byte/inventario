@@ -40,7 +40,9 @@ En la pestaña **Productos**, pulsa **⬆ Importar productos** y elige un archiv
 
 - La primera fila debe tener los nombres de las columnas: **Descripción**, **Cantidad**, **Costo** (obligatorias), y **Precio de venta** y **Aviso de existencia baja** (opcionales). El programa reconoce también nombres parecidos como *Producto*, *Existencia* o *Costo unitario*.
 - Pulsa **Plantilla** para descargar un Excel vacío con las columnas correctas.
-- Antes de importar, el programa te muestra cuántos productos entrarán y cuáles se omiten (descripción repetida, cantidad o costo inválidos). Los productos nuevos reciben su código automáticamente.
+- **El archivo funciona como base de datos**: los productos nuevos se crean (con su código automático) y los que ya existen, con la misma descripción, se **actualizan** con la cantidad, el costo, el precio y el aviso del archivo. Si dejas vacío el precio o el aviso, se conserva el que ya tenía el producto.
+- Antes de importar, el programa te muestra cuántos productos son nuevos, cuántos se actualizarán y cuáles se omiten (cantidad o costo inválidos, o descripción repetida dentro del archivo).
+- Importar **reemplaza** las cantidades de los productos existentes por las del archivo. Si registraste ventas o compras después de generar el archivo, esas cantidades se pisan: usa la importación para cargas iniciales o para ajustes de inventario.
 
 ### Archivo de ejemplo: inventario de un colmado
 
